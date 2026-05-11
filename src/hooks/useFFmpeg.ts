@@ -42,10 +42,11 @@ export const useFFmpeg = () => {
     const data = await ffmpeg.readFile(outputName) as Uint8Array;
     const buffer = new ArrayBuffer(data.byteLength);
     new Uint8Array(buffer).set(data);
-    const url = URL.createObjectURL(new Blob([buffer], { type: 'video/quicktime' }));
+    const blob = new Blob([buffer], { type: 'video/quicktime' });
+    const url = URL.createObjectURL(blob);
     
     setConverting(false);
-    return { url, name: file.name.replace('.mp4', '.mov') };
+    return { url, blob, name: file.name.replace('.mp4', '.mov') };
   };
 
   return { loaded, progress, converting, load, convert };
