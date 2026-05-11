@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, query, where, getDocs, Timestamp, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, addDoc, query, where, Timestamp, onSnapshot, orderBy } from 'firebase/firestore';
 import { db, storage } from '../firebase';
 
 export interface ConvertedVideo {
@@ -55,5 +55,5 @@ export const useFirebase = () => {
     });
   };
 
-  return { uploadVideo, getVideosByGroup, subscribeToVideos, uploading };
+  return { uploadVideo, subscribeToVideos, uploading };
 };

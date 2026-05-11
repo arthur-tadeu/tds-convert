@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Users, HardDrive } from 'lucide-react';
 import type { Group } from '../constants/groups';
-import { useFirebase, ConvertedVideo } from '../hooks/useFirebase';
+import { useFirebase } from '../hooks/useFirebase';
+import type { ConvertedVideo } from '../hooks/useFirebase';
 
 interface GroupDashboardProps {
   groups: Group[];
