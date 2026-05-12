@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Download, RefreshCw, FileCheck, CheckCircle2, Edit3 } from 'lucide-react';
+import { Download, RefreshCw, FileCheck, CheckCircle2, Edit3, Loader2 } from 'lucide-react';
+import JSZip from 'jszip';
 
 interface ConvertedVideo {
   url: string;
@@ -18,6 +19,7 @@ export const VideoResult = ({
   onReset 
 }: VideoResultProps) => {
   const [fileNames, setFileNames] = useState<string[]>([]);
+  const [isZipping, setIsZipping] = useState(false);
 
   useEffect(() => {
     setFileNames(results.map(v => v.name));
@@ -34,7 +36,6 @@ export const VideoResult = ({
     const finalName = name.toLowerCase().endsWith('.mov') ? name : `${name}.mov`;
     
     // Create a temporary link and trigger download programmatically
-    // This is more reliable in some browsers/environments
     const link = document.createElement('a');
     link.href = url;
     link.download = finalName;
@@ -43,11 +44,61 @@ export const VideoResult = ({
     document.body.removeChild(link);
   };
 
+  const handleDownloadAll = async () => {
+    setIsZipping(true);
+    try {
+      const zip = new JSZip();
+      
+      results.forEach((video, index) => {
+        const name = fileNames[index] || video.name;
+        const finalName = name.toLowerCase().endsWith('.mov') ? name : `${name}.mov`;
+        zip.file(finalName, video.blob);
+      });
+      
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'videos_convertidos.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao gerar ZIP:', error);
+    } finally {
+      setIsZipping(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: '1.8rem', margin: 0 }}>Arquivos Convertidos</h2>
         <div style={{ display: 'flex', gap: '1rem' }}>
+          {results.length > 1 && (
+            <button 
+              onClick={handleDownloadAll} 
+              className="action-btn" 
+              disabled={isZipping}
+              style={{ 
+                width: 'auto', 
+                padding: '0 1.5rem', 
+                gap: '0.5rem', 
+                background: 'var(--accent-purple)', 
+                color: 'white',
+                borderColor: 'transparent'
+              }}
+            >
+              {isZipping ? (
+                <Loader2 size={18} className="spin" />
+              ) : (
+                <Download size={18} />
+              )}
+              <span>{isZipping ? 'Compactando...' : 'Baixar Tudo (.zip)'}</span>
+            </button>
+          )}
           <button onClick={onReset} className="action-btn" title="Converter novos" style={{ width: 'auto', padding: '0 1.5rem', gap: '0.5rem' }}>
             <RefreshCw size={18} />
             <span>Novo Lote</span>
