@@ -19,7 +19,6 @@ export const VideoResult = ({
 }: VideoResultProps) => {
   const [fileNames, setFileNames] = useState<string[]>([]);
 
-  // Initialize file names from results
   useEffect(() => {
     setFileNames(results.map(v => v.name));
   }, [results]);
@@ -28,6 +27,20 @@ export const VideoResult = ({
     const updatedNames = [...fileNames];
     updatedNames[index] = newName;
     setFileNames(updatedNames);
+  };
+
+  const handleDownload = (url: string, name: string) => {
+    // Ensure .mov extension
+    const finalName = name.toLowerCase().endsWith('.mov') ? name : `${name}.mov`;
+    
+    // Create a temporary link and trigger download programmatically
+    // This is more reliable in some browsers/environments
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = finalName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -87,15 +100,20 @@ export const VideoResult = ({
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <a 
-                  href={video.url} 
-                  download={fileNames[index] || video.name} 
+                <button 
+                  onClick={() => handleDownload(video.url, fileNames[index] || video.name)}
                   className="action-btn" 
                   title="Baixar"
-                  style={{ background: 'var(--accent-cyan)', color: '#000', borderColor: 'transparent' }}
+                  style={{ 
+                    background: 'var(--accent-cyan)', 
+                    color: '#000', 
+                    borderColor: 'transparent',
+                    cursor: 'pointer',
+                    width: '48px'
+                  }}
                 >
                   <Download size={18} />
-                </a>
+                </button>
               </div>
             </div>
           </motion.div>
@@ -105,7 +123,7 @@ export const VideoResult = ({
       {results.length > 1 && (
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center' }}>
           <CheckCircle2 size={14} style={{ display: 'inline', marginRight: '0.5rem', color: '#22c55e' }} />
-          Todos os {results.length} arquivos prontos para download com nomes personalizados.
+          Todos os {results.length} arquivos prontos para download.
         </p>
       )}
     </div>
